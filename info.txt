@@ -1,0 +1,10 @@
+main > {
+    base -> for setup and tear down
+    page -> classes for each page , following POM
+    utils -> useful modules
+
+}
+
+test > {
+    tests -> test cases
+}
