@@ -18,11 +18,12 @@ import org.testng.annotations.BeforeSuite;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BaseTest {
-    protected WebDriver driver;
-    protected ExtentReports extent;
-    protected ExtentTest test;
+    protected static WebDriver driver;
+    protected static ExtentReports extent;
+    protected static final ConcurrentHashMap<String, ExtentTest> tests = new ConcurrentHashMap<>();
 
     @BeforeSuite
     public void setupReport() {
@@ -31,30 +32,44 @@ public class BaseTest {
         extent.attachReporter(spark);
     }
 
-
     @BeforeMethod
-    public void setup() {
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+    public void setup(ITestResult result) {
+        if (driver == null) {
+            driver = new ChromeDriver();
+            driver.manage().window().maximize();
+        }
+        String methodName = result.getMethod().getMethodName();
+        ExtentTest test = extent.createTest(methodName);
+        tests.put(methodName, test);
     }
 
     @AfterMethod
     public void tearDown(ITestResult testResult) {
-        if (testResult.getStatus() == ITestResult.FAILURE) {
-            // Log the failure reason
-            test.log(Status.FAIL, "Test failed because of: " + testResult.getThrowable());
+        String methodName = testResult.getMethod().getMethodName();
+        ExtentTest test = tests.get(methodName);
 
-            // Capture screenshot as Base64
-            String screenshotBase64 = captureScreenshotAsBase64();
-
-            // Embed the Base64 screenshot directly into the Extent Report
-            if (screenshotBase64 != null) {
-                test.addScreenCaptureFromBase64String(screenshotBase64, "Failure Screenshot");
-            } else {
-                test.log(Status.WARNING, "Screenshot could not be captured.");
+        if (test != null) {
+            if (testResult.getStatus() == ITestResult.FAILURE) {
+                // Log the failure reason
+                test.log(Status.FAIL, "Test failed because of: " + testResult.getThrowable());
+                // Capture screenshot as Base64
+                String screenshotBase64 = captureScreenshotAsBase64();
+                // Embed the Base64 screenshot directly into the Extent Report
+                if (screenshotBase64 != null) {
+                    test.addScreenCaptureFromBase64String(screenshotBase64, "Failure Screenshot");
+                } else {
+                    test.log(Status.WARNING, "Screenshot could not be captured.");
+                }
+            } else if (testResult.getStatus() == ITestResult.SUCCESS) {
+                test.log(Status.PASS, "Test passed.");
+            } else if (testResult.getStatus() == ITestResult.SKIP) {
+                test.log(Status.SKIP, "Test skipped.");
             }
+
+            tests.remove(methodName);
         }
-        driver.quit();
+
+        // Do not quit the driver here to maintain session across tests
     }
 
     public String captureScreenshotAsBase64() {
@@ -62,7 +77,6 @@ public class BaseTest {
             // Capture screenshot as a file
             TakesScreenshot ts = (TakesScreenshot) driver;
             File src = ts.getScreenshotAs(OutputType.FILE);
-
             // Convert the screenshot file to a Base64 string
             byte[] fileContent = FileUtils.readFileToByteArray(src);
             return Base64.getEncoder().encodeToString(fileContent);
@@ -71,8 +85,14 @@ public class BaseTest {
             return null;
         }
     }
+
     @AfterSuite
     public void flushReport() {
-        extent.flush();
+        if (extent != null) {
+            extent.flush();
+        }
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
