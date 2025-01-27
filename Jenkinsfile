@@ -1,6 +1,9 @@
 pipeline {
     agent any
-
+tools {
+        maven 'Maven' // Ensure this matches the name in Global Tool Configuration
+        jdk 'Adoptium'      // Ensure this matches the name in Global Tool Configuration
+    }
     stages {
         stage('Checkout') {
             steps {
