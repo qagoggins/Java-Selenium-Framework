@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 public class LoginTest extends BaseTest {
 
-    @Test(dataProvider = "loginData", dataProviderClass = TestData.class)
+    @Test(dataProvider = "loginData", dataProviderClass = TestData.class, groups = "loginGroup")
     public void login(String username, String password) {
         try {
             driver.get("https://www.saucedemo.com/");

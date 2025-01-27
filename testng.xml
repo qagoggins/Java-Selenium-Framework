@@ -1,11 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="All Test Suite">
-    <test verbose="2" preserve-order="true" name="C:/Users/user/�������/ElonMuskProject/Day4">
+<suite name="ElonMuskProjectSuite">
+    <test name="Choose one product" verbose="2" preserve-order="true">
+        <groups>
+            <define name="loginGroup"/>
+            <define name="addToCartGroup"/>
+            <define name="checkoutAndBuyGroup"/>
+
+            <dependencies>
+                <group name="addToCartGroup" depends-on="loginGroup"/>
+                <group name="checkoutAndBuyGroup" depends-on="addToCartGroup"/>
+            </dependencies>
+        </groups>
+
         <classes>
             <class name="tests.LoginTest">
+                <methods>
+                    <include name="login" group="loginGroup"/>
+                </methods>
             </class>
             <class name="tests.AddToCartTest">
+                <methods>
+                    <include name="addToCart" group="addToCartGroup"/>
+<!--                    <include name="addMultipleProductsToCart" group="addToCartGroup"/>-->
+                </methods>
+            </class>
+            <class name="tests.CheckoutAndBuyTest">
+                <methods>
+                    <include name="checkoutAndBuyProduct" group="checkoutAndBuyGroup"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <test name="ChooseMultipleProducts" verbose="2" preserve-order="true">
+        <groups>
+            <define name="loginGroup"/>
+            <define name="addToCartGroup"/>
+            <define name="checkoutAndBuyGroup"/>
+
+            <dependencies>
+                <group name="addToCartGroup" depends-on="loginGroup"/>
+                <group name="checkoutAndBuyGroup" depends-on="addToCartGroup"/>
+            </dependencies>
+        </groups>
+
+        <classes>
+            <class name="tests.LoginTest">
+                <methods>
+                    <include name="login" group="loginGroup"/>
+                </methods>
+            </class>
+            <class name="tests.AddToCartTest">
+                <methods>
+                    <include name="addMultipleProductsToCart" group="addToCartGroup"/>
+                </methods>
+            </class>
+            <class name="tests.CheckoutAndBuyTest">
+                <methods>
+                    <include name="checkoutAndBuyProduct" group="checkoutAndBuyGroup"/>
+                </methods>
             </class>
         </classes>
     </test>
