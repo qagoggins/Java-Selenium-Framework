@@ -30,7 +30,7 @@ public class TestData {
     @DataProvider
     public Object[][] checkoutFormData() {
         return new Object[][] {
-                {"Cristiano", "Ronaldo", "125030"}
+                {"Cristiano", "Messi", "125030"}
         };
     }
 }
